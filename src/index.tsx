@@ -1,4 +1,10 @@
-import {Form, ActionPanel, Action, Clipboard, showToast, Toast} from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  Clipboard,
+  showToast,
+  Toast } from "@raycast/api";
 import got from "got";
 
 type Values = {
