@@ -1,26 +1,13 @@
 import { Form, ActionPanel, Action, Clipboard, showToast, Toast, LaunchProps } from "@raycast/api";
 import { useState } from "react";
 import fetch, { Headers, RequestInit } from "node-fetch";
+import { OneTimeSecretClient, OneTimeSecretResponse } from "./one-time-secret-client";
 
 type Values = {
   lifetime: string;
   recipient: string;
   passphrase: string;
   secret: string;
-};
-
-type OneTimeSecretResponse = {
-  custid: string;
-  metadata_key: string;
-  secret_key: string;
-  ttl: number;
-  metadata_ttl: number;
-  secret_ttl: number;
-  state: string;
-  updated: number;
-  created: number;
-  recipient: Array<string>;
-  passphrase_required: string;
 };
 
 export default function Command(props: LaunchProps<{ draftValues: Values }>) {
@@ -43,31 +30,15 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
     });
 
     try {
-      const baseUrl = "https://onetimesecret.com";
+      const oneTimeSecretClient = new OneTimeSecretClient();
 
-      const url = new URL(`${baseUrl}/api/v1/share`);
+      const response = await oneTimeSecretClient.storeAnonymousSecret(
+        values.secret,
+        values.lifetime,
+        values.passphrase
+      );
 
-      const body = new URLSearchParams();
-      body.append("secret", values.secret);
-      body.append("ttl", values.lifetime);
-
-      if (values.passphrase) {
-        body.append("passphrase", values.passphrase);
-      }
-
-      const init: RequestInit = {
-        method: "POST",
-        headers: new Headers([["content-type", "application/x-www-form-urlencoded"]]),
-        body: body.toString(),
-      };
-
-      const response = await fetch(url.href, init);
-      const data: OneTimeSecretResponse = (await response.json()) as OneTimeSecretResponse;
-      console.log(data);
-
-      const shareableUrl = `${baseUrl}/secret/${data?.secret_key}`;
-
-      await Clipboard.copy(shareableUrl);
+      await Clipboard.copy(oneTimeSecretClient.getShareableUrl(response.secret_key));
 
       toast.style = Toast.Style.Success;
       toast.title = "Shared secret";
