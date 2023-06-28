@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, Clipboard, showToast, Toast } from "@raycast/api";
+import { Form, ActionPanel, Action, Clipboard, showToast, Toast, LaunchProps } from "@raycast/api";
 import got from "got";
 import { useState } from "react";
 
@@ -9,7 +9,9 @@ type Values = {
   secret: string;
 };
 
-export default function Command() {
+export default function Command(props: LaunchProps<{ draftValues: Values }>) {
+  const { draftValues } = props;
+
   const [secretError, setSecretError] = useState<string | undefined>();
 
   function dropSecretErrorIfNeeded() {
@@ -71,12 +73,14 @@ export default function Command() {
           <Action.SubmitForm onSubmit={handleSubmit} />
         </ActionPanel>
       }
+      enableDrafts
     >
       <Form.TextArea
         id="secret"
         title="Secret*"
         placeholder="The secret to be sent"
         info="Required"
+        defaultValue={draftValues?.secret}
         error={secretError}
         onChange={dropSecretErrorIfNeeded}
         onBlur={(event) => {
@@ -93,6 +97,7 @@ export default function Command() {
         title="Passphrase"
         placeholder="Something top sneaky"
         info="Optional. Encrypt the secret with this value."
+        defaultValue={draftValues?.passphrase}
       />
       <Form.Dropdown
         id="lifetime*"
