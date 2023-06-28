@@ -1,12 +1,26 @@
 import { Form, ActionPanel, Action, Clipboard, showToast, Toast, LaunchProps } from "@raycast/api";
-import got from "got";
 import { useState } from "react";
+import fetch, { Headers, RequestInit } from "node-fetch";
 
 type Values = {
   lifetime: string;
   recipient: string;
   passphrase: string;
   secret: string;
+};
+
+type OneTimeSecretResponse = {
+  custid: string;
+  metadata_key: string;
+  secret_key: string;
+  ttl: number;
+  metadata_ttl: number;
+  secret_ttl: number;
+  state: string;
+  updated: number;
+  created: number;
+  recipient: Array<string>;
+  passphrase_required: string;
 };
 
 export default function Command(props: LaunchProps<{ draftValues: Values }>) {
@@ -23,14 +37,6 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
   async function handleSubmit(values: Values) {
     console.log(values);
 
-    if (!values.secret) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Secret is required",
-      });
-      return;
-    }
-
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Storing secret",
@@ -41,18 +47,25 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
 
       const url = new URL(`${baseUrl}/api/v1/share`);
 
-      url.searchParams.set("secret", values.secret);
-      url.searchParams.set("lifetime", values.lifetime);
+      const body = new URLSearchParams();
+      body.append("secret", values.secret);
+      body.append("ttl", values.lifetime);
 
       if (values.passphrase) {
-        url.searchParams.set("passphrase", values.passphrase);
+        body.append("passphrase", values.passphrase);
       }
 
-      console.log(url);
+      const init: RequestInit = {
+        method: "POST",
+        headers: new Headers([["content-type", "application/x-www-form-urlencoded"]]),
+        body: body.toString(),
+      };
 
-      const { body } = await got.post(url.href);
+      const response = await fetch(url.href, init);
+      const data: OneTimeSecretResponse = (await response.json()) as OneTimeSecretResponse;
+      console.log(data);
 
-      const shareableUrl = `${baseUrl}/secret/${JSON.parse(body).secret_key}`;
+      const shareableUrl = `${baseUrl}/secret/${data?.secret_key}`;
 
       await Clipboard.copy(shareableUrl);
 
@@ -100,8 +113,8 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
         defaultValue={draftValues?.passphrase}
       />
       <Form.Dropdown
-        id="lifetime*"
-        title="Lifetime"
+        id="lifetime"
+        title="Lifetime*"
         info="Required. How long should the secret be available for?"
         storeValue
       >
