@@ -1,4 +1,14 @@
-import { Form, ActionPanel, Action, Clipboard, showToast, Toast, LaunchProps } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  Clipboard,
+  showToast,
+  Toast,
+  LaunchProps,
+  popToRoot,
+  closeMainWindow,
+} from "@raycast/api";
 import { useState } from "react";
 import { OneTimeSecretClient } from "./one-time-secret-client";
 
@@ -42,6 +52,9 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
       toast.style = Toast.Style.Success;
       toast.title = "Shared secret";
       toast.message = "Copied link to clipboard";
+
+      await popToRoot({ clearSearchBar: false });
+      await closeMainWindow();
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed sharing secret";
