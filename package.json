@@ -23,6 +23,12 @@
       "title": "Send One-Time Secret",
       "description": "Stores a secret on One-Time Secret and gives back the shareable URL.",
       "mode": "view"
+    },
+    {
+      "name": "send-from-clipboard",
+      "title": "Send from Clipboard",
+      "description": "Creates a one-time secret from the clipboard (3h lifetime, no passphrase) and copies the link.",
+      "mode": "no-view"
     }
   ],
   "tools": [
