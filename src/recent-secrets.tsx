@@ -166,7 +166,15 @@ export default function RecentSecretsCommand() {
                     }
                   }}
                 />
-                <Action.OpenInBrowser title="View Receipt History" url={receiptHistoryUrl} />
+                <Action.OpenInBrowser
+                  title="View Receipt History"
+                  url={receiptHistoryUrl}
+                  icon={Icon.Receipt}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd", "shift"], key: "h" },
+                    Windows: { modifiers: ["ctrl", "shift"], key: "h" },
+                  }}
+                />
                 {canBurnSecret(row) ? (
                   <Action
                     title="Burn Secret"
