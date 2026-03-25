@@ -1,7 +1,7 @@
 import { Clipboard, showToast, Toast } from "@raycast/api";
-import { OneTimeSecretClient } from "./one-time-secret-client";
+import { createClientFromPreferences } from "./create-client";
 
-const THREE_HOURS_TTL_SECONDS = "10800";
+const THREE_HOURS_TTL_SECONDS = 10800;
 
 export default async function Command() {
   const raw = await Clipboard.readText();
@@ -22,9 +22,9 @@ export default async function Command() {
   });
 
   try {
-    const client = new OneTimeSecretClient();
-    const response = await client.storeAnonymousSecret(secret, THREE_HOURS_TTL_SECONDS, null);
-    await Clipboard.copy(client.getShareableUrl(response.secret_key));
+    const client = createClientFromPreferences();
+    const response = await client.concealSecret(secret, THREE_HOURS_TTL_SECONDS, null);
+    await Clipboard.copy(client.getShareableUrl(response.secretIdentifier));
 
     toast.style = Toast.Style.Success;
     toast.title = "Shared secret";

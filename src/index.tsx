@@ -10,7 +10,7 @@ import {
   closeMainWindow,
 } from "@raycast/api";
 import { useState } from "react";
-import { OneTimeSecretClient } from "./one-time-secret-client";
+import { createClientFromPreferences } from "./create-client";
 
 type Values = {
   lifetime: string;
@@ -19,10 +19,13 @@ type Values = {
   secret: string;
 };
 
+const MIN_PASSPHRASE_LENGTH = 8;
+
 export default function Command(props: LaunchProps<{ draftValues: Values }>) {
   const { draftValues } = props;
 
   const [secretError, setSecretError] = useState<string | undefined>();
+  const [passphraseError, setPassphraseError] = useState<string | undefined>();
 
   function dropSecretErrorIfNeeded() {
     if (secretError && secretError.length > 0) {
@@ -30,8 +33,18 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
     }
   }
 
+  function dropPassphraseErrorIfNeeded() {
+    if (passphraseError && passphraseError.length > 0) {
+      setPassphraseError(undefined);
+    }
+  }
+
   async function handleSubmit(values: Values) {
-    console.log(values);
+    const trimmedPass = values.passphrase?.trim() ?? "";
+    if (trimmedPass.length > 0 && trimmedPass.length < MIN_PASSPHRASE_LENGTH) {
+      setPassphraseError(`Passphrase must be at least ${MIN_PASSPHRASE_LENGTH} characters (API requirement).`);
+      return;
+    }
 
     const toast = await showToast({
       style: Toast.Style.Animated,
@@ -39,15 +52,15 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
     });
 
     try {
-      const oneTimeSecretClient = new OneTimeSecretClient();
-
-      const response = await oneTimeSecretClient.storeAnonymousSecret(
+      const client = createClientFromPreferences();
+      const ttl = Number.parseInt(values.lifetime, 10);
+      const response = await client.concealSecret(
         values.secret,
-        values.lifetime,
-        values.passphrase,
+        Number.isNaN(ttl) ? 3600 : ttl,
+        trimmedPass.length > 0 ? trimmedPass : null,
       );
 
-      await Clipboard.copy(oneTimeSecretClient.getShareableUrl(response.secret_key));
+      await Clipboard.copy(client.getShareableUrl(response.secretIdentifier));
 
       toast.style = Toast.Style.Success;
       toast.title = "Shared secret";
@@ -92,8 +105,10 @@ export default function Command(props: LaunchProps<{ draftValues: Values }>) {
         id="passphrase"
         title="Passphrase"
         placeholder="Something top sneaky"
-        info="Optional. Encrypt the secret with this value."
+        info={`Optional. Minimum ${MIN_PASSPHRASE_LENGTH} characters if set.`}
         defaultValue={draftValues?.passphrase}
+        error={passphraseError}
+        onChange={dropPassphraseErrorIfNeeded}
       />
       <Form.Dropdown
         id="lifetime"
