@@ -1,6 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 import {
-  getRegionBaseUrl,
   OneTimeSecretClient,
   type OneTimeSecretCredentials,
   type RegionCode,
