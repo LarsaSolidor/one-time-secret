@@ -50,6 +50,11 @@ function statusLabel(row: RecentReceiptRow): string {
   }
 }
 
+/** Burn is only allowed before the secret has been revealed or destroyed. */
+function canBurnSecret(row: RecentReceiptRow): boolean {
+  return row.lifecycle !== "received" && row.lifecycle !== "viewed" && row.lifecycle !== "burned";
+}
+
 export default function RecentSecretsCommand() {
   const [rows, setRows] = useState<RecentReceiptRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -163,30 +168,32 @@ export default function RecentSecretsCommand() {
                     }
                   }}
                 />
-                <Action
-                  title="Burn Secret"
-                  icon={Icon.Trash}
-                  style={Action.Style.Destructive}
-                  onAction={async () => {
-                    const confirmed = await confirmAlert({
-                      title: "Burn this secret?",
-                      message: "The share link will stop working. This cannot be undone.",
-                      primaryAction: { title: "Burn", style: Alert.ActionStyle.Destructive },
-                      dismissAction: { title: "Cancel", style: Alert.ActionStyle.Cancel },
-                    });
-                    if (!confirmed) {
-                      return;
-                    }
-                    try {
-                      const client = createClientFromPreferences();
-                      await client.burn(row.metadataKey);
-                      await showToast({ style: Toast.Style.Success, title: "Burned" });
-                      await load();
-                    } catch (e) {
-                      await showToast({ style: Toast.Style.Failure, title: "Burn failed", message: String(e) });
-                    }
-                  }}
-                />
+                {canBurnSecret(row) ? (
+                  <Action
+                    title="Burn Secret"
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    onAction={async () => {
+                      const confirmed = await confirmAlert({
+                        title: "Burn this secret?",
+                        message: "The share link will stop working. This cannot be undone.",
+                        primaryAction: { title: "Burn", style: Alert.ActionStyle.Destructive },
+                        dismissAction: { title: "Cancel", style: Alert.ActionStyle.Cancel },
+                      });
+                      if (!confirmed) {
+                        return;
+                      }
+                      try {
+                        const client = createClientFromPreferences();
+                        await client.burn(row.metadataKey);
+                        await showToast({ style: Toast.Style.Success, title: "Burned" });
+                        await load();
+                      } catch (e) {
+                        await showToast({ style: Toast.Style.Failure, title: "Burn failed", message: String(e) });
+                      }
+                    }}
+                  />
+                ) : null}
                 <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => void load()} />
                 <Action
                   title="Open Extension Preferences"
