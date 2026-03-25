@@ -1,9 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import {
-  OneTimeSecretClient,
-  type OneTimeSecretCredentials,
-  type RegionCode,
-} from "./one-time-secret-client";
+import { OneTimeSecretClient, type OneTimeSecretCredentials, type RegionCode } from "./one-time-secret-client";
 
 export function createClientFromPreferences(): OneTimeSecretClient {
   const prefs = getPreferenceValues<Preferences>();
