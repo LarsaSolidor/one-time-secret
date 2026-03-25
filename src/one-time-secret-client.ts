@@ -294,18 +294,15 @@ function normaliseReceiptItem(item: unknown): RecentReceiptRow | null {
 }
 
 function normaliseReceiptObject(rec: Record<string, unknown>): RecentReceiptRow | null {
-  const metadataKey =
-    readString(rec.key) ?? readString(rec.identifier) ?? readString(rec.metadata_key);
+  const metadataKey = readString(rec.key) ?? readString(rec.identifier) ?? readString(rec.metadata_key);
   if (!metadataKey) {
     return null;
   }
 
   const stateStr = readString(rec.state);
   const isBurned = readBool(rec.is_burned) || stateStr === "burned";
-  const isReceived =
-    readBool(rec.is_received) || readBool(rec.is_revealed) || stateStr === "revealed";
-  const isViewed =
-    readBool(rec.is_viewed) || readBool(rec.is_previewed) || stateStr === "previewed";
+  const isReceived = readBool(rec.is_received) || readBool(rec.is_revealed) || stateStr === "revealed";
+  const isViewed = readBool(rec.is_viewed) || readBool(rec.is_previewed) || stateStr === "previewed";
   const lifecycle: RecentReceiptLifecycle = isBurned
     ? "burned"
     : isReceived
