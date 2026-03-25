@@ -12,7 +12,7 @@ import {
   confirmAlert,
 } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
-import { createClientFromPreferences, getAccountBaseUrlFromPreferences } from "./create-client";
+import { createClientFromPreferences } from "./create-client";
 import type { RecentReceiptRow } from "./one-time-secret-client";
 
 function formatTtl(seconds: number): string {
@@ -84,8 +84,6 @@ export default function RecentSecretsCommand() {
     void load();
   }, [load]);
 
-  const accountUrl = getAccountBaseUrlFromPreferences();
-
   if (error && rows.length === 0 && !loading) {
     return (
       <List isLoading={loading}>
@@ -95,7 +93,6 @@ export default function RecentSecretsCommand() {
           actions={
             <ActionPanel>
               <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={() => openExtensionPreferences()} />
-              <Action.OpenInBrowser title="Open Regional Site" url={accountUrl} />
               <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={() => void load()} />
             </ActionPanel>
           }
@@ -202,7 +199,6 @@ export default function RecentSecretsCommand() {
                   icon={Icon.Gear}
                   onAction={() => openExtensionPreferences()}
                 />
-                <Action.OpenInBrowser title="Regional Site" url={accountUrl} />
               </ActionPanel>
             }
           />
@@ -217,7 +213,6 @@ export default function RecentSecretsCommand() {
           <ActionPanel>
             <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => void load()} />
             <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={() => openExtensionPreferences()} />
-            <Action.OpenInBrowser title="Open Regional Site" url={accountUrl} />
           </ActionPanel>
         }
       />

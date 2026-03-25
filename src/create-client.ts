@@ -15,9 +15,3 @@ export function createClientFromPreferences(): OneTimeSecretClient {
     username.length > 0 && apiToken.length > 0 ? { username, apiToken } : null;
   return OneTimeSecretClient.fromRegion(region, credentials);
 }
-
-export function getAccountBaseUrlFromPreferences(): string {
-  const prefs = getPreferenceValues<Preferences>();
-  const region = (prefs.region ?? "uk") as RegionCode;
-  return getRegionBaseUrl(region);
-}
