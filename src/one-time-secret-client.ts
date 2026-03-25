@@ -87,6 +87,12 @@ export class OneTimeSecretClient {
     return `${this.baseUrl}/secret/${secretIdentifier}`;
   }
 
+  /** Web receipt / history page for this metadata key (regional site). */
+  public getReceiptHistoryUrl(metadataKey: string): string {
+    const base = this.baseUrl.replace(/\/$/, "");
+    return `${base}/receipt/${encodeURIComponent(metadataKey)}`;
+  }
+
   public hasCredentials(): boolean {
     return this.credentials !== null;
   }

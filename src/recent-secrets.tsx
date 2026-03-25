@@ -109,6 +109,7 @@ export default function RecentSecretsCommand() {
       {rows.map((row) => {
         const title = row.secretShortid ?? row.metadataKey.slice(0, 12);
         const subtitle = `${statusLabel(row)} · ${formatTtl(row.metadataTtlSeconds)} · ${formatTime(row.createdUnix)}`;
+        const receiptHistoryUrl = createClientFromPreferences().getReceiptHistoryUrl(row.metadataKey);
         return (
           <List.Item
             key={row.metadataKey}
@@ -168,6 +169,7 @@ export default function RecentSecretsCommand() {
                     }
                   }}
                 />
+                <Action.OpenInBrowser title="View Receipt History" url={receiptHistoryUrl} />
                 {canBurnSecret(row) ? (
                   <Action
                     title="Burn Secret"
